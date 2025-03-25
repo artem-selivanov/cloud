@@ -22,7 +22,7 @@ function validateEmail(email) {
 }
 
 function validateApiKey(apiKey) {
-    const apiKeyRegex = /^[a-zA-Z0-9]{32}$/;
+    const apiKeyRegex = /^[a-zA-Z0-9]{37}$/;
     return apiKeyRegex.test(apiKey);
 }
 
@@ -38,7 +38,7 @@ function validateForm() {
     }
 
     if (!validateApiKey(apiKey)) {
-        showAlert('❌ Невірний API-ключ! Він має містити 32 символи.', 'danger');
+        showAlert('❌ Невірний API-ключ! Він має містити 37 символи.', 'danger');
         return false;
     }
 
@@ -54,26 +54,17 @@ function validateForm() {
         }
     }
 
-    showAlert('✅ Форма успішно перевірена!', 'success');
     return true;
 }
 
-
-/*document.getElementById('cloudflareForm').addEventListener('submit', function(event) {
-    event.preventDefault();  // Остановить отправку формы
+document.getElementById('cloudflareForm').addEventListener('submit', function(event) {
+    event.preventDefault();  // Останавливаем стандартную отправку формы
 
     if (!validateForm()) {
         console.log("⛔ Форма содержит ошибки, отправка отменена.");
-        return;
+        return;  // Прерываем выполнение, если есть ошибки
     }
 
-    // Если данные прошли валидацию, вывести их в консоль
-    const formData = new FormData(this);
-    const formObject = {};
-
-    formData.forEach((value, key) => {
-        formObject[key] = value;
-    });
-
-    console.log("✅ Данные формы:", formObject);
-});*/
+    // Если валидация прошла, вручную отправляем форму
+    this.submit();  // Отправляем форму
+});
