@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 //const spreadsheet = require('./helpers/spreadsheet')
-const cloudflare = require('./helpers/cloudflare')
+//const cloudflare = require('./helpers/cloudflare')
 //const {DateTime} = require("luxon");
 const app = express();
 
@@ -21,8 +21,8 @@ app.post('/process-form', async (req, res) => {
         const { email, apiKey, domains, ipAddresses, settings } = req.body;
         const domainList = domains.split('\n').map(domain => domain.trim());
         console.log({ email, apiKey, domains, ipAddresses, settings });
-        const logs = await cloudflare.setupCloudflare({ email, apiKey, domains: domainList, ipAddresses, settings });
-        console.log(logs)
+        //const logs = await cloudflare.setupCloudflare({ email, apiKey, domains: domainList, ipAddresses, settings });
+        //console.log(logs)
         const nowInKyiv = ""//DateTime.now().setZone("Europe/Kyiv").toFormat("dd.MM.yyyy HH:mm")
         //await spreadsheet.addRows(process.env.SHEET,process.env.TAB,logs.map(i=>[nowInKyiv,...i]))
         res.render('result', { logs:[]});
