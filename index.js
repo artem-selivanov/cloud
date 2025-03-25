@@ -24,7 +24,7 @@ app.post('/process-form', async (req, res) => {
         const logs = await cloudflare.setupCloudflare({ email, apiKey, domains: domainList, ipAddresses, settings });
         //console.log(logs)
         const nowInKyiv = DateTime.now().setZone("Europe/Kyiv").toFormat("dd.MM.yyyy HH:mm")
-        await spreadsheet.addRows(process.env.SHEET,process.env.TAB,logs.map(i=>[nowInKyiv,...i]))
+        //await spreadsheet.addRows(process.env.SHEET,process.env.TAB,logs.map(i=>[nowInKyiv,...i]))
         res.render('result', { logs});
     } catch (error) {
         console.error('Error during form processing:', error);
