@@ -12,7 +12,7 @@ async function setupCloudflare({email, apiKey, domains, ipAddresses, settings}) 
     for (const domain of domains) {
         try {
             let zoneId = await getZoneId(domain, headers) || await createDomain(domain, headers)
-            console.log(zoneId)
+            //console.log(zoneId)
             //zoneId = !zoneId?await createDomain(domain, headers):zoneId;
             results.push({domain, action: 'getOrCreateZone', result: 'success', zoneId});
 
@@ -48,7 +48,7 @@ async function setupCloudflare({email, apiKey, domains, ipAddresses, settings}) 
         }
     }
 
-
+    console.log(results)
     return results.map(i => [i.domain, i.action, i.result, i.error || ""]);
 }
 
@@ -60,7 +60,7 @@ async function apiCall(url, method, headers, data = {}) {
         return res.data.result;
     } catch (error) {
         let e = error?.response?.data?.errors ? error.response.data.errors.map(i => i.message).join(';') : error.response?.data || error.message
-        console.log(e)
+        //console.log(e)
         throw new Error(e);
     }
 }

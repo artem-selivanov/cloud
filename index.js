@@ -26,7 +26,7 @@ app.post('/process-form', async (req, res) => {
         const nowInKyiv = DateTime.now().setZone("Europe/Kyiv").toFormat("dd.MM.yyyy HH:mm")
 
         //await spreadsheet.addRows(process.env.SHEET,process.env.TAB,logs.map(i=>[nowInKyiv,...i]))
-        res.render('result', { logs});
+        res.render('result', { logs:[]});
     } catch (error) {
         console.error('Error during form processing:', error);
         res.status(500).send('An error occurred while processing the form.');
