@@ -1,9 +1,11 @@
+
+try{
 const express = require('express');
 const bodyParser = require('body-parser');
-//require('dotenv').config();
-//const spreadsheet = require('./helpers/spreadsheet')
+require('dotenv').config();
+const spreadsheet = require('./helpers/spreadsheet')
 const cloudflare = require('./helpers/cloudflare')
-//const {DateTime} = require("luxon");
+const {DateTime} = require("luxon");
 const app = express();
 
 app.set('view engine', 'ejs');
@@ -37,6 +39,8 @@ app.listen(5000, () => {
 });
 
 
-
+} catch (e) {
+    console.log(e)
+}
 
 
