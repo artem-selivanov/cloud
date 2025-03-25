@@ -22,8 +22,9 @@ app.post('/process-form', async (req, res) => {
         const domainList = domains.split('\n').map(domain => domain.trim());
         console.log({ email, apiKey, domains, ipAddresses, settings });
         const logs = await cloudflare.setupCloudflare({ email, apiKey, domains: domainList, ipAddresses, settings });
-        //console.log(logs)
+        console.log(logs)
         const nowInKyiv = DateTime.now().setZone("Europe/Kyiv").toFormat("dd.MM.yyyy HH:mm")
+
         //await spreadsheet.addRows(process.env.SHEET,process.env.TAB,logs.map(i=>[nowInKyiv,...i]))
         res.render('result', { logs});
     } catch (error) {
