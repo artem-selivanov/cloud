@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 require('dotenv').config();
-const spreadsheet = require('./helpers/spreadsheet')
+//const spreadsheet = require('./helpers/spreadsheet')
 const cloudflare = require('./helpers/cloudflare')
 const {DateTime} = require("luxon");
 const app = express();
