@@ -3,7 +3,6 @@ const axios = require('axios');
 
 async function setupCloudflare({login, apiKey, domains, ipAddresses, settings}) {
     const email = `${login}@gmail.com`
-
     const results = [];
     const headers = {
         'X-Auth-Email': email,
@@ -54,7 +53,7 @@ async function setupCloudflare({login, apiKey, domains, ipAddresses, settings}) 
         }
     }
 
-    console.log(results)
+    //console.log(results)
     return results.map(i => [i.domain, i.action, i.result, i.error || ""]);
 }
 
