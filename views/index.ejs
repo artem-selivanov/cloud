@@ -15,8 +15,8 @@
 
         <form action="/process-form" method="POST" id="cloudflareForm">
             <div class="mb-3">
-                <label for="email" class="form-label">Email (авторизація в Cloudflare):</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+                <label for="login" class="form-label"> Логін Gmail пошти:</label>
+                <input type="text" class="form-control" id="login" name="login" required>
             </div>
 
             <div class="mb-3">
@@ -37,15 +37,15 @@
             <div class="mb-3">
                 <label for="settings" class="form-label">Налаштування:</label><br>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="deleteOldRecords" name="settings[deleteOldRecords]">
+                    <input type="checkbox" class="form-check-input" id="deleteOldRecords" name="settings[deleteOldRecords]" checked>
                     <label for="deleteOldRecords" class="form-check-label">Видалення старих DNS-записів</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="clearCache" name="settings[clearCache]">
+                    <input type="checkbox" class="form-check-input" id="clearCache" name="settings[clearCache]" checked>
                     <label for="clearCache" class="form-check-label">Очистка кешу</label>
                 </div>
                 <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="useHttps" name="settings[useHttps]">
+                    <input type="checkbox" class="form-check-input" id="useHttps" name="settings[useHttps]" checked>
                     <label for="useHttps" class="form-check-label">Використання HTTPS</label>
                 </div>
             </div>

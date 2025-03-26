@@ -1,7 +1,9 @@
 const axios = require('axios');
 
 
-async function setupCloudflare({email, apiKey, domains, ipAddresses, settings}) {
+async function setupCloudflare({login, apiKey, domains, ipAddresses, settings}) {
+    const email = `${login}@gmail.com`
+
     const results = [];
     const headers = {
         'X-Auth-Email': email,
@@ -9,7 +11,8 @@ async function setupCloudflare({email, apiKey, domains, ipAddresses, settings}) 
         'Content-Type': 'application/json'
     };
 
-    for (const domain of domains) {
+    for (let domain of domains) {
+        domain = domain.replace("www.","")
         try {
             let zoneId = await getZoneId(domain, headers) || await createDomain(domain, headers)
             //console.log(zoneId)
@@ -25,6 +28,9 @@ async function setupCloudflare({email, apiKey, domains, ipAddresses, settings}) 
                 .catch(error => handleError(results, domain, 'deleteDnsRecord', error, {recordId: record.id}))));
 
             await addDnsRecord(zoneId, domain, ipAddresses, headers)
+                .then(() => results.push({domain, action: 'addDnsRecord', result: 'success'}))
+                .catch(error => handleError(results, domain, 'addDnsRecord', error));
+            await addDnsRecord(zoneId, `www.${domain}`, ipAddresses, headers)
                 .then(() => results.push({domain, action: 'addDnsRecord', result: 'success'}))
                 .catch(error => handleError(results, domain, 'addDnsRecord', error));
 

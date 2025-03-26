@@ -27,15 +27,15 @@ function validateApiKey(apiKey) {
 }
 
 function validateForm() {
-    const email = document.getElementById('email').value;
+    //const email = document.getElementById('email').value;
     const apiKey = document.getElementById('apiKey').value;
     const ipAddresses = document.getElementById('ipAddresses').value;
     const domains = document.getElementById('domains').value.split("\n");
 
-    if (!validateEmail(email)) {
+    /*if (!validateEmail(email)) {
         showAlert('❌ Невірний формат email!', 'danger');
         return false;
-    }
+    }*/
 
     if (!validateApiKey(apiKey)) {
         showAlert('❌ Невірний API-ключ! Він має містити 37 символи.', 'danger');
