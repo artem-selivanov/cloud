@@ -80,7 +80,9 @@ async function apiCall(url, method, headers, data = {}) {
 const createDomain = (name, headers) => apiCall('https://api.cloudflare.com/client/v4/zones', 'POST', headers, {
     type: 'full',
     name
-}).then(res => { return { zoneId: res?.id , ns:res?.name_servers}; }); //
+}).then(res => {
+    console.log(res);
+    return { zoneId: res?.id , ns:res?.name_servers}; }); //
 const getZoneId = (domain, headers) => apiCall(`https://api.cloudflare.com/client/v4/zones?name=${domain}`, 'GET', headers).then(res => { return {zoneId:res[0]?.id || null, ns:res[0]?.name_servers} });
 const getDnsRecords = (zoneId, headers) => apiCall(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`, 'GET', headers);
 const deleteDnsRecord = (zoneId, recordId, headers) => apiCall(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records/${recordId}`, 'DELETE', headers);
