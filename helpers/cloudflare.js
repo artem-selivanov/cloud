@@ -13,7 +13,10 @@ async function setupCloudflare({login, apiKey, domains, ipAddresses, settings, m
     for (let domain of domains) {
         domain = domain.replace("www.","")
         try {
-            let {zoneId, ns} = await getZoneId(domain, headers) || await createDomain(domain, headers)
+            let { zoneId, ns } = await getZoneId(domain, headers);
+            if (!zoneId) {
+                ({ zoneId, ns } = await createDomain(domain, headers));
+            }
             results.push({domain, action: 'getOrCreateZone', result: 'success', zoneId});
 
             const dnsRecords = await getDnsRecords(zoneId, headers);
@@ -81,7 +84,7 @@ const createDomain = (name, headers) => apiCall('https://api.cloudflare.com/clie
     type: 'full',
     name
 }).then(res => {
-    console.log(res);
+    //console.log(res);
     return { zoneId: res?.id , ns:res?.name_servers}; }); //
 const getZoneId = (domain, headers) => apiCall(`https://api.cloudflare.com/client/v4/zones?name=${domain}`, 'GET', headers).then(res => { return {zoneId:res[0]?.id || null, ns:res[0]?.name_servers} });
 const getDnsRecords = (zoneId, headers) => apiCall(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`, 'GET', headers);
