@@ -19,10 +19,12 @@ try {
 
     app.post('/process-form', async (req, res) => {
         try {
-            const {login, apiKey, domains, ipAddresses, settings} = req.body;
+            const {login, apiKey, domains, ipAddresses, settings, macSelection} = req.body;
             const domainList = domains.split('\n').map(domain => domain.trim());
-            console.log({login, apiKey, domains, ipAddresses, settings});
-            const logs = await cloudflare.setupCloudflare({login, apiKey, domains: domainList, ipAddresses, settings});
+
+            const macApi = process.env[macSelection]
+            console.log({login, apiKey, domains, ipAddresses, settings, macSelection, macApi});
+            const logs = await cloudflare.setupCloudflare({login, apiKey, domains: domainList, ipAddresses, settings, macApi});
             //console.log(logs)
             // add here
             const nowInKyiv = DateTime.now().setZone("Europe/Kyiv").toFormat("dd.MM.yyyy HH:mm")
