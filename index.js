@@ -21,8 +21,8 @@ try {
         try {
             const {login, apiKey, domains, ipAddresses, settings, macSelection} = req.body;
             const domainList = domains.split('\n').map(domain => domain.trim());
-
-            const macApi = process.env[macSelection]
+            console.log(macSelection)
+            const macApi = process.env[macSelection.toUpperCase()]
             console.log({login, apiKey, domains, ipAddresses, settings, macSelection, macApi});
             const logs = await cloudflare.setupCloudflare({login, apiKey, domains: domainList, ipAddresses, settings, macApi});
             //console.log(logs)
@@ -36,8 +36,8 @@ try {
         }
     });
 
-    app.listen(5202, () => {
-        console.log('Server running on port 5202');
+    app.listen(5203, () => {
+        console.log('Server running on port 5203');
     });
 } catch (e) {
     console.log(e)
