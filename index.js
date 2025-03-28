@@ -36,7 +36,7 @@ try {
         }
     });
 
-    app.listen(5201, () => {
+    app.listen(5202, () => {
         console.log('Server running on port 5201');
     });
 } catch (e) {
