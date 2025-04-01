@@ -29,7 +29,7 @@ try {
             const spid = process.env[`${macSelection.toUpperCase()}_ID`]
             const spapi = process.env[`${macSelection.toUpperCase()}_API`]
             console.log({login, apiKey, domains:domainList, ipAddresses, settings, macSelection, macApi, serverName, password, spid, spapi});
-            const logs1 = []//await cloudflare.setupCloudflare({login, apiKey, domains: domainList, ipAddresses, settings, macApi, serverName});
+            const logs1 = await cloudflare.setupCloudflare({login, apiKey, domains: domainList, ipAddresses, settings, macApi, serverName});
             const logs2 = await sp.setupServer({id:spid, api:spapi, name:serverName, domains:domainList, password});
             const logs = [...logs1, ...logs2]
             const nowInKyiv = DateTime.now().setZone("Europe/Kyiv").toFormat("dd.MM.yyyy HH:mm")
