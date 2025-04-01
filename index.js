@@ -4,9 +4,10 @@ try {
     require('dotenv').config();
     const spreadsheet = require('./helpers/spreadsheet')
     const cloudflare = require('./helpers/cloudflare')
+    const sp = require('./helpers/serverPilot')
     const {DateTime} = require("luxon");
     const app = express();
-
+    const port = 5205;
     app.set('view engine', 'ejs');
     app.use(express.static('public'));
 
@@ -19,14 +20,18 @@ try {
 
     app.post('/process-form', async (req, res) => {
         try {
-            const {login, apiKey, domains, ipAddresses, settings, macSelection} = req.body;
+            const {login, apiKey, domains, ipAddresses, settings, macSelection, serverPilot} = req.body;
             const domainList = domains.split('\n').map(domain => domain.trim());
-            console.log(macSelection)
+            const serverName = serverPilot.replace(/[ _\/+,]/g, "-").replaceAll('--',"-").toLowerCase()
+            //console.log(macSelection)
             const macApi = process.env[macSelection.toUpperCase()]
-            console.log({login, apiKey, domains, ipAddresses, settings, macSelection, macApi});
-            const logs = await cloudflare.setupCloudflare({login, apiKey, domains: domainList, ipAddresses, settings, macApi});
-            //console.log(logs)
-            // add here
+            const password = process.env[`${macSelection.toUpperCase()}_PASSWORD`]
+            const spid = process.env[`${macSelection.toUpperCase()}_ID`]
+            const spapi = process.env[`${macSelection.toUpperCase()}_API`]
+            console.log({login, apiKey, domains:domainList, ipAddresses, settings, macSelection, macApi, serverName, password, spid, spapi});
+            const logs1 = []//await cloudflare.setupCloudflare({login, apiKey, domains: domainList, ipAddresses, settings, macApi, serverName});
+            const logs2 = await sp.setupServer({id:spid, api:spapi, name:serverName, domains:domainList, password});
+            const logs = [...logs1, ...logs2]
             const nowInKyiv = DateTime.now().setZone("Europe/Kyiv").toFormat("dd.MM.yyyy HH:mm")
             await spreadsheet.addRows(process.env.SHEET, process.env.TAB, logs.map(i => [nowInKyiv, ...i]))
             res.render('result', {logs});
@@ -36,8 +41,8 @@ try {
         }
     });
 
-    app.listen(5204, () => {
-        console.log('Server running on port 5204');
+    app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
     });
 } catch (e) {
     console.log(e)
