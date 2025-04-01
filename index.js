@@ -7,7 +7,7 @@ try {
     const sp = require('./helpers/serverPilot')
     const {DateTime} = require("luxon");
     const app = express();
-    const port = 5205;
+    const port = 5206;
     app.set('view engine', 'ejs');
     app.use(express.static('public'));
 
