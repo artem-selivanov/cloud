@@ -4,7 +4,7 @@ try {
     require('dotenv').config();
     const spreadsheet = require('./helpers/spreadsheet')
     const cloudflare = require('./helpers/cloudflare')
-    const sp = require('./helpers/serverPilot')
+
     const {DateTime} = require("luxon");
     const app = express();
     const port = 5207;
@@ -28,10 +28,8 @@ try {
             const password = process.env[`${macSelection.toUpperCase()}_PASSWORD`]
             const spid = process.env[`${macSelection.toUpperCase()}_ID`]
             const spapi = process.env[`${macSelection.toUpperCase()}_API`]
-            console.log({login, apiKey, domains:domainList, ipAddresses, settings, macSelection, macApi, serverName, password, spid, spapi});
-            const logs1 = await cloudflare.setupCloudflare({login, apiKey, domains: domainList, ipAddresses, settings, macApi, serverName});
-            const logs2 = []//await sp.setupServer({id:spid, api:spapi, name:serverName, domains:domainList, password});
-            const logs = [...logs1, ...logs2]
+            console.log({login, apiKey, domains:domainList, ipAddresses, settings, macSelection, macApi, serverName, spid, spapi, password});
+            const logs = await cloudflare.setupCloudflare({login, apiKey, domains: domainList, ipAddresses, settings, macApi, serverName, spid, spapi, password});
             const nowInKyiv = DateTime.now().setZone("Europe/Kyiv").toFormat("dd.MM.yyyy HH:mm")
             await spreadsheet.addRows(process.env.SHEET, process.env.TAB, logs.map(i => [nowInKyiv, ...i]))
             res.render('result', {logs});

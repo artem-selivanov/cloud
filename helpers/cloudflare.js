@@ -1,7 +1,8 @@
 const axios = require('axios');
+const sp = require('../helpers/serverPilot')
 
 
-async function setupCloudflare({login, apiKey, domains, ipAddresses, settings, macApi}) {
+async function setupCloudflare({login, apiKey, domains, ipAddresses, settings, macApi, serverName, spid, spapi, password}) {
     const email = `${login}@gmail.com`
     const results = [];
     const headers = {
@@ -58,6 +59,11 @@ async function setupCloudflare({login, apiKey, domains, ipAddresses, settings, m
             //macApi
             const updateNs = await dynadot(macApi, domain, ns)
             results.push(updateNs)
+
+            if (updateNs.result=='success') {
+                const logs = await sp.setupServer({id:spid, api:spapi, name:serverName, domain, password, ipAddresses});
+                results.push(...logs)
+            }
         } catch (error) {
             handleError(results, domain, 'setupCloudflare', error);
         }

@@ -1,32 +1,27 @@
 const axios = require('axios');
 
-
-async function setupServer({id, api, name, domains,password}) {
+async function setupServer({id, api, name, domain, password, ipAddresses}) {
     const results = []
+    domain = domain.replace("www.", "")
     const auth = Buffer.from(`${id}:${api}`).toString('base64');
     try {
-        const servers = await getServers(auth)
-        results.push({domain: domains.join("; "), result: 'success', action: 'getServer serverPilot'})
-        const user = await getUsers(auth, servers[0].id) || await createUser(auth, servers[0].id, password)
-        results.push({domain: domains.join("; "), result: 'success', action: 'findOrCreate User serverPilot'})
-        const resutls = []
-        for (let domain of domains) {
-            domain = domain.replace("www.", "")
-            try {
-                const app = await createApp(auth, user.id, domain, name)
-                results.push({domain, result: 'success', action: 'create WP App'})
-                await enableSSL(auth, app)
-                results.push({domain, result: 'success', action: 'enableSSL'})
-                await forceRedirect(auth, app)
-                results.push({domain, result: 'success', action: 'forceRedirect'})
-            } catch (e) {
-                results.push({...e, domain})
-            }
-        }
+        const server = await getServers(auth, ipAddresses)
+        console.log(server)
+        results.push({domain, result: 'success', action: 'getServer serverPilot'})
+        const user = await getUsers(auth, server.id) || await createUser(auth, server.id, password)
+        results.push({domain, result: 'success', action: 'findOrCreate User serverPilot'})
+        const app = await createApp(auth, user.id, domain, name)
+        results.push({domain, result: 'success', action: 'create WP App'})
+        await waitForSeconds(30)
+        await enableSSL(auth, app)
+        results.push({domain, result: 'success', action: 'enableSSL'})
+        await forceRedirect(auth, app)
+        results.push({domain, result: 'success', action: 'forceRedirect'})
     } catch (error) {
-        results.push({...error, domain: domains.join("; ")})
+        console.log(error)
+        results.push({...error, domain})
     }
-    return results.map(i => [i.domain, i.action, i.result, i.error || ""]);
+    return results
 }
 
 async function getUsers(auth, server) {
@@ -38,20 +33,19 @@ async function getUsers(auth, server) {
     return response.data.data.find(i => i.name === 'user' && i.serverid === server)
 }
 
-async function getServers(auth) {
+async function getServers(auth, ipAddresses) {
     try {
         const response = await axios.get(`https://api.serverpilot.io/v1/servers`, {
             headers: {
                 'Authorization': `Basic ${auth}`
             }
         })
-        //console.log(response.data.data)
-        if (response.data.data.length == 0) throw {
+        if (response.data.data.length == 0 || !response.data.data.find(i => i.lastaddress == ipAddresses)) throw {
             result: 'error',
-            error: 'Cant find server in account',
+            error: `Cant find server with ip ${ipAddresses} in account`,
             action: 'getServer in ServerPilot'
         }
-        return response.data.data
+        return response.data.data.find(i => i.lastaddress == ipAddresses)
     } catch (e) {
         if (e?.action) {
             throw {
@@ -169,6 +163,10 @@ function handleError(results, domain, action, error, extra = {}) {
 
 function capitalizeFirstLetter(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+async function waitForSeconds(seconds) {
+    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
 }
 
 module.exports = {setupServer};
