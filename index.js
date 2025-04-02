@@ -7,7 +7,7 @@ try {
     const sp = require('./helpers/serverPilot')
     const {DateTime} = require("luxon");
     const app = express();
-    const port = 5206;
+    const port = 5207;
     app.set('view engine', 'ejs');
     app.use(express.static('public'));
 
@@ -30,7 +30,7 @@ try {
             const spapi = process.env[`${macSelection.toUpperCase()}_API`]
             console.log({login, apiKey, domains:domainList, ipAddresses, settings, macSelection, macApi, serverName, password, spid, spapi});
             const logs1 = await cloudflare.setupCloudflare({login, apiKey, domains: domainList, ipAddresses, settings, macApi, serverName});
-            const logs2 = await sp.setupServer({id:spid, api:spapi, name:serverName, domains:domainList, password});
+            const logs2 = []//await sp.setupServer({id:spid, api:spapi, name:serverName, domains:domainList, password});
             const logs = [...logs1, ...logs2]
             const nowInKyiv = DateTime.now().setZone("Europe/Kyiv").toFormat("dd.MM.yyyy HH:mm")
             await spreadsheet.addRows(process.env.SHEET, process.env.TAB, logs.map(i => [nowInKyiv, ...i]))
