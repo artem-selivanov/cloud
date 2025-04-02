@@ -12,7 +12,7 @@ async function setupServer({id, api, name, domain, password, ipAddresses}) {
         results.push({domain, result: 'success', action: 'findOrCreate User serverPilot'})
         const app = await createApp(auth, user.id, domain, name)
         results.push({domain, result: 'success', action: 'create WP App'})
-        await waitForSeconds(30)
+        await waitForSeconds(60)
         await enableSSL(auth, app)
         results.push({domain, result: 'success', action: 'enableSSL'})
         await forceRedirect(auth, app)
