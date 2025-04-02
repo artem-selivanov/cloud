@@ -2,9 +2,21 @@ const axios = require('axios');
 const sp = require('../helpers/serverPilot')
 
 
-async function setupCloudflare({login, apiKey, domains, ipAddresses, settings, macApi, serverName, spid, spapi, password}) {
+async function setupCloudflare({
+                                   login,
+                                   apiKey,
+                                   domains,
+                                   ipAddresses,
+                                   settings,
+                                   macApi,
+                                   serverName,
+                                   spid,
+                                   spapi,
+                                   password
+                               }) {
     const email = `${login}@gmail.com`
     const results = [];
+    const updateNext = []
     const headers = {
         'X-Auth-Email': email,
         'X-Auth-Key': apiKey,
@@ -12,11 +24,11 @@ async function setupCloudflare({login, apiKey, domains, ipAddresses, settings, m
     };
 
     for (let domain of domains) {
-        domain = domain.replace("www.","")
+        domain = domain.replace("www.", "")
         try {
-            let { zoneId, ns } = await getZoneId(domain, headers);
+            let {zoneId, ns} = await getZoneId(domain, headers);
             if (!zoneId) {
-                ({ zoneId, ns } = await createDomain(domain, headers));
+                ({zoneId, ns} = await createDomain(domain, headers));
             }
             results.push({domain, action: 'getOrCreateZone', result: 'success', zoneId});
 
@@ -25,9 +37,14 @@ async function setupCloudflare({login, apiKey, domains, ipAddresses, settings, m
 
 
             if (settings?.deleteOldRecords === 'on')
-            await Promise.all(dnsRecords.map(record => deleteDnsRecord(zoneId, record.id, headers)
-                .then(() => results.push({domain, action: 'deleteDnsRecord', recordId: record.id, result: 'success'}))
-                .catch(error => handleError(results, domain, 'deleteDnsRecord', error, {recordId: record.id}))));
+                await Promise.all(dnsRecords.map(record => deleteDnsRecord(zoneId, record.id, headers)
+                    .then(() => results.push({
+                        domain,
+                        action: 'deleteDnsRecord',
+                        recordId: record.id,
+                        result: 'success'
+                    }))
+                    .catch(error => handleError(results, domain, 'deleteDnsRecord', error, {recordId: record.id}))));
 
             await addDnsRecord(zoneId, domain, ipAddresses, headers)
                 .then(() => results.push({domain, action: 'addDnsRecord', result: 'success'}))
@@ -51,7 +68,7 @@ async function setupCloudflare({login, apiKey, domains, ipAddresses, settings, m
                 await enableHttps(zoneId, headers)
                     .then(() => results.push({domain, action: 'enableHttps', result: 'success'}))
                     .catch(error => handleError(results, domain, 'enableHttps', error));
-            if (!ns||ns.length<2) {
+            if (!ns || ns.length < 2) {
                 handleError(results, domain, 'getNsServers', 'Not 2 ns servers')
                 continue
             }
@@ -60,9 +77,17 @@ async function setupCloudflare({login, apiKey, domains, ipAddresses, settings, m
             const updateNs = await dynadot(macApi, domain, ns)
             results.push(updateNs)
 
-            if (updateNs.result=='success') {
-                const logs = await sp.setupServer({id:spid, api:spapi, name:serverName, domain, password, ipAddresses});
+            if (updateNs.result == 'success') {
+                const {logs, update} = await sp.setupServer({
+                    id: spid,
+                    api: spapi,
+                    name: serverName,
+                    domain,
+                    password,
+                    ipAddresses
+                });
                 results.push(...logs)
+                updateNext.push(...update)
             }
         } catch (error) {
             handleError(results, domain, 'setupCloudflare', error);
@@ -70,8 +95,27 @@ async function setupCloudflare({login, apiKey, domains, ipAddresses, settings, m
     }
 
     //console.log(results)
-    return results.map(i => [i.domain, i.action, i.result, i.error || ""]);
+    return {logs: results.map(i => [i.domain, i.action, i.result, i.error || ""]), update: updateNext};
 }
+
+async function finalSteps(update) {
+    const results = []
+    for (let {domain, auth, app} of update) {
+        try {
+            await sp.enableSSL(auth, app)
+            results.push({domain, result: 'success', action: 'enableSSL'})
+            await sp.forceRedirect(auth, app)
+            results.push({domain, result: 'success', action: 'forceRedirect'})
+        } catch (error) {
+            console.log(error)
+            results.push({...error, domain})
+        }
+
+    }
+    return results.map(i => [i.domain, i.action, i.result, i.error || ""])
+
+}
+
 
 async function apiCall(url, method, headers, data = {}) {
     try {
@@ -91,8 +135,11 @@ const createDomain = (name, headers) => apiCall('https://api.cloudflare.com/clie
     name
 }).then(res => {
     //console.log(res);
-    return { zoneId: res?.id , ns:res?.name_servers}; }); //
-const getZoneId = (domain, headers) => apiCall(`https://api.cloudflare.com/client/v4/zones?name=${domain}`, 'GET', headers).then(res => { return {zoneId:res[0]?.id || null, ns:res[0]?.name_servers} });
+    return {zoneId: res?.id, ns: res?.name_servers};
+}); //
+const getZoneId = (domain, headers) => apiCall(`https://api.cloudflare.com/client/v4/zones?name=${domain}`, 'GET', headers).then(res => {
+    return {zoneId: res[0]?.id || null, ns: res[0]?.name_servers}
+});
 const getDnsRecords = (zoneId, headers) => apiCall(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`, 'GET', headers);
 const deleteDnsRecord = (zoneId, recordId, headers) => apiCall(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records/${recordId}`, 'DELETE', headers);
 const addDnsRecord = (zoneId, domain, ipAddresses, headers) => apiCall(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`, 'POST', headers, {
@@ -106,12 +153,20 @@ const disableIPv6 = (zoneId, headers) => apiCall(`https://api.cloudflare.com/cli
 const clearCache = (zoneId, headers) => apiCall(`https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`, 'POST', headers, {purge_everything: true});
 const enableHttps = (zoneId, headers) => apiCall(`https://api.cloudflare.com/client/v4/zones/${zoneId}/settings/always_use_https`, 'PATCH', headers, {value: 'on'});
 
-async function dynadot (api, domain, ns, results) {
+async function dynadot(api, domain, ns, results) {
     const response = await axios.get(`https://api.dynadot.com/api3.json?key=${api}&command=set_ns&domain=${domain}&ns0=${ns[0]}&ns1=${ns[1]}`)
-    let result = {domain, action:"update NS Dynadot", result: 'success'}
+    let result = {domain, action: "update NS Dynadot", result: 'success'}
     //console.log(response.data)
-    if (response.data?.Response?.ResponseCode=='-1') result = {...result,result: 'error', error:response.data.Response.Error}
-    if (response.data?.SetNsResponse?.Status=='error') result = {...result,result: 'error', error:response.data.SetNsResponse.Error}
+    if (response.data?.Response?.ResponseCode == '-1') result = {
+        ...result,
+        result: 'error',
+        error: response.data.Response.Error
+    }
+    if (response.data?.SetNsResponse?.Status == 'error') result = {
+        ...result,
+        result: 'error',
+        error: response.data.SetNsResponse.Error
+    }
     return result
 }
 
@@ -121,4 +176,4 @@ function handleError(results, domain, action, error, extra = {}) {
     results.push({domain, action, result: 'error', error: error.message, ...extra});
 }
 
-module.exports = {setupCloudflare};
+module.exports = {setupCloudflare, finalSteps};

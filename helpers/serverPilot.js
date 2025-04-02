@@ -2,6 +2,7 @@ const axios = require('axios');
 
 async function setupServer({id, api, name, domain, password, ipAddresses}) {
     const results = []
+    const update = []
     domain = domain.replace("www.", "")
     const auth = Buffer.from(`${id}:${api}`).toString('base64');
     try {
@@ -12,16 +13,17 @@ async function setupServer({id, api, name, domain, password, ipAddresses}) {
         results.push({domain, result: 'success', action: 'findOrCreate User serverPilot'})
         const app = await createApp(auth, user.id, domain, name)
         results.push({domain, result: 'success', action: 'create WP App'})
-        await waitForSeconds(60)
+        update.push({domain, auth, app})
+        /*await waitForSeconds(60)
         await enableSSL(auth, app)
         results.push({domain, result: 'success', action: 'enableSSL'})
         await forceRedirect(auth, app)
-        results.push({domain, result: 'success', action: 'forceRedirect'})
+        results.push({domain, result: 'success', action: 'forceRedirect'})*/
     } catch (error) {
         console.log(error)
         results.push({...error, domain})
     }
-    return results
+    return {logs: results, update}
 }
 
 async function getUsers(auth, server) {
@@ -169,4 +171,4 @@ async function waitForSeconds(seconds) {
     return new Promise(resolve => setTimeout(resolve, seconds * 1000));
 }
 
-module.exports = {setupServer};
+module.exports = {setupServer, enableSSL, forceRedirect};
