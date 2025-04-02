@@ -7,7 +7,7 @@ try {
 
     const {DateTime} = require("luxon");
     const app = express();
-    const port = 5208;
+    const port = 5209;
     app.set('view engine', 'ejs');
     app.use(express.static('public'));
 
@@ -20,14 +20,14 @@ try {
 
     app.post('/process-form', async (req, res) => {
         try {
-            const {login, apiKey, domains, ipAddresses, settings, macSelection, serverPilot} = req.body;
+            const {login, apiKey, domains, ipAddresses, settings, macSelection, serverPilot, spSelection} = req.body;
             const domainList = domains.split('\n').map(domain => domain.trim());
             const serverName = serverPilot.replace(/[ _\/+,]/g, "-").replaceAll('--',"-").toLowerCase()
             //console.log(macSelection)
             const macApi = process.env[macSelection.toUpperCase()]
-            const password = process.env[`${macSelection.toUpperCase()}_PASSWORD`]
-            const spid = process.env[`${macSelection.toUpperCase()}_ID`]
-            const spapi = process.env[`${macSelection.toUpperCase()}_API`]
+            const password = process.env[`${spSelection.toUpperCase()}_PASSWORD`]
+            const spid = process.env[`${spSelection.toUpperCase()}_ID`]
+            const spapi = process.env[`${spSelection.toUpperCase()}_API`]
             console.log({login, apiKey, domains:domainList, ipAddresses, settings, macSelection, macApi, serverName, spid, spapi, password});
             const logs = await cloudflare.setupCloudflare({login, apiKey, domains: domainList, ipAddresses, settings, macApi, serverName, spid, spapi, password});
             const nowInKyiv = DateTime.now().setZone("Europe/Kyiv").toFormat("dd.MM.yyyy HH:mm")
