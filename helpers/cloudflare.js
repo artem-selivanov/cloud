@@ -197,15 +197,15 @@ async function porkbun({api, secret, domain, ns}) {
         })
 
         const response = await axios.post(`https://api.porkbun.com/api/json/v3/domain/updateNs/${domain}`, {
-            apikey: api,
-            secretapikey: secret,
-            ns: ns
+            "apikey": api,
+            "secretapikey": secret,
+            "ns": ns
         });
 
 
 
         if (response.data.status === 'SUCCESS') {
-            console.log('NS сервера успешно обновлены:', NS_SERVERS);
+            console.log('NS сервера успешно обновлены:', ns);
         } else {
             console.error('Ошибка обновления NS серверов:', response.data);
             result = {
@@ -217,7 +217,7 @@ async function porkbun({api, secret, domain, ns}) {
     } catch (error) {
 
         console.error('Ошибка при запросе к API:', error.message);
-        console.log(error.message)
+        //console.log(error)
         result = {
             ...result,
             result: 'error',
