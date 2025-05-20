@@ -189,12 +189,22 @@ async function dynadot({api, domain, ns}) {
 async function porkbun({api, secret, domain, ns}) {
     let result = {domain, action: "update NS porkBun", result: 'success'}
     try {
+        console.log({
+            apikey: api,
+            secretapikey: secret,
+            domain: domain,
+            nameservers: ns
+        })
+
         const response = await axios.post(`https://api.porkbun.com/api/json/v3/domain/updateNs/${domain}`, {
             apikey: api,
             secretapikey: secret,
             domain: domain,
             nameservers: ns
         });
+
+
+
         if (response.data.status === 'SUCCESS') {
             console.log('NS сервера успешно обновлены:', NS_SERVERS);
         } else {
@@ -208,7 +218,7 @@ async function porkbun({api, secret, domain, ns}) {
     } catch (error) {
 
         console.error('Ошибка при запросе к API:', error.message);
-        console.log(error.response.data.message)
+        console.log(error.message)
         result = {
             ...result,
             result: 'error',
