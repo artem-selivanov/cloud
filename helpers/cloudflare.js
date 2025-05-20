@@ -95,7 +95,7 @@ async function setupCloudflare({
     }
     // }
 
-    console.log(results)
+    console.log('get logs')
     //
     return {logs: results.map(i => [i.domain, i.action, i.result, i.error || ""]), update: updateNext};
 }
