@@ -193,14 +193,13 @@ async function porkbun({api, secret, domain, ns}) {
             apikey: api,
             secretapikey: secret,
             domain: domain,
-            nameservers: ns
+            ns: ns
         })
 
         const response = await axios.post(`https://api.porkbun.com/api/json/v3/domain/updateNs/${domain}`, {
             apikey: api,
             secretapikey: secret,
-            domain: domain,
-            nameservers: ns
+            ns: ns
         });
 
 
