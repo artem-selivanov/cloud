@@ -5,6 +5,7 @@ require('dotenv').config();
 
 async function processForm(body) {
     const { login, apiKey, domains, ipAddresses, settings, macSelection, serverPilot, spSelection, domainService} = body;
+    console.log(settings)
     //const domainList = domains//.split('\n').map(domain => domain.trim());
     const domain = domains.trim()
     const serverName = serverPilot.replace(/[ _\/+,]/g, "-").replaceAll('--', "-").toLowerCase();

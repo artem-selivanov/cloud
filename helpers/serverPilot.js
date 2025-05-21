@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-async function setupServer({id, api, name, domain, password, ipAddresses}) {
+async function setupServer({id, api, name, domain, password, ipAddresses, wp}) {
     const results = []
     const update = []
     domain = domain.replace("www.", "")
@@ -11,8 +11,8 @@ async function setupServer({id, api, name, domain, password, ipAddresses}) {
         results.push({domain, result: 'success', action: 'getServer serverPilot'})
         const user = await getUsers(auth, server.id) || await createUser(auth, server.id, password)
         results.push({domain, result: 'success', action: 'findOrCreate User serverPilot'})
-        const app = await createApp(auth, user.id, domain, name)
-        results.push({domain, result: 'success', action: 'create WP App'})
+        const app = await createApp(auth, user.id, domain, name, wp)
+        results.push({domain, result: 'success', action: `create ${wp?'WP':'HTML'} App`})
         update.push({domain, auth, app})
         /*await waitForSeconds(60)
         await enableSSL(auth, app)
@@ -85,20 +85,24 @@ async function createUser(auth, server, password) {
     return
 }
 
-async function createApp(auth, sysuserid, domain, name) {
+async function createApp(auth, sysuserid, domain, name, wp) {
     const site_title = capitalizeFirstLetter(domain.split(".")[0])
     const data = {
         name,
         sysuserid,
         runtime: "php7.4",
-        domains: [`${domain}`, `www.${domain}`],
-        wordpress: {
+        domains: [domain, `www.${domain}`],
+    };
+
+    if (wp) {
+        data.wordpress = {
             site_title,
             admin_user: "user",
             admin_password: "serverserver3103",
             admin_email: `${domain}@gmail.com`
-        }
-    };
+        };
+    }
+
 
 
     try {

@@ -84,7 +84,8 @@ async function setupCloudflare({
                 name: serverName,
                 domain,
                 password,
-                ipAddresses
+                ipAddresses,
+                wp:settings?.createWp === 'on'
             });
             results.push(...logs)
             updateNext.push(...update)
